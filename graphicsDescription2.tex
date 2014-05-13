@@ -1,0 +1,68 @@
+\documentclass[14pt,a4paper]{report}
+\usepackage{russ}
+\usepackage{mathtools}
+\usepackage[left=3cm,right=2cm,top=3cm,bottom=3cm]{geometry}
+\usepackage{graphicx}
+
+\usepackage[cp1251]{inputenc}
+
+\begin{document}
+
+\chapter{продолжение}
+\subsection{Проекция перспективы}
+При проецировании трёхмерного пространства на двумерную плоскость для реалистичности изображения следует сохранять его глубину.
+Это достаточно нетривиальная задача. Для её решения используется преобразование, известное как проекция перспективы. Кроме упомянутой задачи, проекция перспективы решает и другую: в современных мониторах ширина экрана, как правило, больше, чем высота. В то же время графический процессор обрабатывает вершины с координатами, лежащими в отрезке [-1.0, 1.0] по всем координатным осям. Это означает, что, например, квадрат будет отображен как прямоугольник. Рассматриваемое преобразование призвано решать эту проблему.
+Для построения проекции перспективы используются следующие входные данные:
+\begin{enumerate}
+\item \begin{math}q\end{math} - соотношение сторон прямоугольной области, на которую будет осуществляться проекция.
+\item \begin{math}\alpha\end{math} - угол обзора камеры по вертикали.
+\item \begin{math}d_n\end{math} - позиция ближайшей видимой плоскости, перпендикулярной оси \begin{math}z\end{math}.
+\item \begin{math}d_f\end{math} - позиция самой дальней видимой плоскости, перпендикулярной оси \begin{math}z\end{math}.
+\end{enumerate}
+Рассмотрим наиболее интересный из этапов построения матрицы данного преобразования, а именно расчёт координат вершин в окне проекции
+(далее --- проецированных координат). Для начала следует найти расстояние от камеры до плоскости проекции, используя угол обзора по вертикали:
+
+\begin{center}\begin{math} d = \frac{1}{\tan{\frac{\alpha}{2}}} \end{math}\end{center}
+
+Затем можно приступить непосредственно к подсчёту проецированных координат \begin{math}x, y\end{math}.
+  Пусть обрабатывается вершина с координатами \begin{math}(x, y, z)\end{math}. Нужно найти \begin{math}(x_p, y_p)\end{math} - соответствующие координаты на плоскости проекции. Рассмотрим следующий рисунок:
+  \begin{center}\includegraphics[width=6cm,height=6cm]{D://cam.png} \end{center} 
+  Согласно правилу подобных треугольников:
+  \begin{center}\begin{math} y_p = \frac{yd}{z} = \frac{y}{z\tan{\frac{\alpha}{2}}},    x_p = \frac{xd}{z} = \frac{x}{z\tan{\frac{\alpha}{2}}}\end{math}\end{center}
+   Ширина и высота окна проекции равны, очевидно, \begin{math}2q\end{math} и \begin{math}2\end{math} соответственно. Точка в пространстве попадает в окно проекции, если она проецируется в точку с координатами \begin{math}x_p\in[-q, +q]\end{math},
+   \begin{math}y_p\in[-1, 1]\end{math}. Координата \begin{math}y_p\end{math} нормирована, осталось пронормировать координату \begin{math}x_p\end{math}, поделив на соотношение сторон \begin{math}q\end{math}. Теперь точка, с координатой \begin{math}x = q\end{math} имеет координату \begin{math}x_p = 1.0\end{math}, следовательно располагается на правой границе экрана.
+
+   В результате получили следующие выражения для \begin{math}x_p\end{math} и \begin{math}y_p\end{math}:
+   \begin{center}\begin{math}y_p = \frac{y}{z\tan{\frac{\alpha}{2}}},    x_p = \frac{x}{qz\tan{\frac{\alpha}{2}}}\end{math}\end{center}
+   В обоих выражениях присутствует множитель \begin{math}\frac{1}{z}\end{math} Но координата \begin{math}z\end{math} меняется от вершины к вершине, поэтому этот множитель нельзя поместить в матрицу преобразования, применяемую ко всем вершинам. Возникшая проблема в OpenGL решается следующим образом: умножение вектора позиции вершины на \begin{math}\frac{1}{z}\end{math} выполняется графическим процессором после прохождения вершинного шейдера, а значит из выражений для \begin{math}x_p\end{math}, \begin{math}y_p\end{math} и последующих этот множитель необходимо убрать.
+   Сам процесс умножения на \begin{math}\frac{1}{z}\end{math} называется делением перспективы.
+   
+   Далее нужно найти инъективное отображение, переводящее отрезок \begin{math}[d_n, d_f]\end{math} в отрезок \begin{math}[-1, 1]\end{math}. Отображение представляет из себя сжатие \begin{math}[d_n, d_f]\end{math} до отрезка длины \begin{math}2\end{math} с последующим совмещением начала полученного отрезка с \begin{math}-1\end{math}. Теперь ясно, что искомое отображение имеет вид:
+   
+   \begin{center}\begin{math}f(z) = az + b\end{math}\end{center}
+   
+   , где \begin{math}a, b\end{math} некоторые константы, поиску которых посвящён остаток раздела.
+   Известно, что когда \begin{math}f(d_n) = -1, f(d_f) = 1\end{math}. Выполним некоторые вычисления, предварительно разделив \begin{math}f(z)\end{math} на \begin{math}z\end{math}:
+   \begin{center}\begin{math}a + \frac{b}{d_n} = -1 \Rightarrow a = -1 -\frac{b}{d_n} \end{math};\end{center}
+   
+   
+   \begin{center}\begin{math}a + \frac{b}{d_f} = 1 \Rightarrow \frac{b}{d_f} - 1 - \frac{b}{d_n} = 1 \Rightarrow 
+   b(d_n - d_f) = 2d_n d_f \Rightarrow b = \frac{2d_n d_f}{d_n - d_f}\end{math};\end{center}
+   
+   \begin{center}\begin{math}a = -1 - \frac{b}{d_n}  = \frac{-d_n - d_f}{d_n - d_f} \end{math};\end{center}
+   
+   Имеем:
+   \begin{center}\begin{math}f(z) = \frac{-d_n - d_f}{d_n - d_f}z + \frac{2d_n d_f}{d_n - d_f}\end{math}\end{center}
+   
+   
+   Теперь можно составить матрицу проекции перспективы (процесс составления матрицы опускается, поскольку не представляет особого интереса). В результате получается матрица следующего вида:
+   \begin{equation}
+P =
+  \begin{pmatrix}
+    \frac{1}{q\tan{\frac{\alpha}{2}}} & 0 & 0 & 0 \\
+    0 & \frac{1}{\tan{\frac{\alpha}{2}}}  & 0 & 0\\
+    0 & 0 & \frac{-d_n - d_f}{d_n - d_f} & \frac{2d_n d_f}{d_n - d_f}\\
+    0 & 0 & 1 & 0
+  \end{pmatrix},
+\end{equation}
+\end{document} 
