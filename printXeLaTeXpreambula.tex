@@ -1,0 +1,61 @@
+\documentclass{thesisbyxetex}
+
+\usepackage[xetex]{graphicx}	%	Подключаем графику
+\usepackage{mathtools}		% 	Подключаем математические символы
+
+\usepackage{amsmath}
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\usepackage{xunicode}
+\usepackage{xltxtra}% говорят что не нужен
+
+%для борьбы с переполнениями за счет разреженных слов в абзаце
+\emergencystretch=25pt
+
+\usepackage{polyglossia}
+\setdefaultlanguage[spelling = modern]{russian}
+\setotherlanguage{english} 
+\defaultfontfeatures{Scale = MatchLowercase,Ligatures=TeX}  %% устанавливает поведение шрифтов по умолчанию  
+
+\setmainfont{XITS}
+\setmathfont{XITS Math}
+\newfontfamily\cyrillicfont{XITS}
+\setsansfont[Mapping=tex-text]{Nimbus Sans L}
+\setmonofont{Nimbus Mono L}
+
+
+\usepackage{enumitem}	
+\setlist{nolistsep}	% отступы между элементами перечесления
+
+\usepackage[unicode, pdfborder={0 0 0 0}]{hyperref}
+
+\usepackage[autostyle]{csquotes}
+\usepackage[%parentracker=true,
+  backend=biber,
+  hyperref=auto,
+  language=auto,
+  autolang=other,
+  style=gost-numeric,
+]{biblatex}
+\addbibresource{bibliography.bib}
+
+\begin{document}
+
+\hypersetup{
+pdftitle = {Курсовая работа},
+pdfauthor = {Кочурко Александр Александрович},
+pdfsubject = {курсовая},
+pdfkeywords = {графический движок, язык D, курсовая}
+}% End of hypersetup
+
+%\input{title}	% Титульный лист
+\tableofcontents 	% Оглавление, которое генерируется автоматически
+\input{introduction} 
+\input{graphicsDescription}
+
+
+\printbibliography
+\addcontentsline{toc}{chapter}{Литература}
+
+\end{document} 

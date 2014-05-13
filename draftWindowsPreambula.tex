@@ -1,0 +1,33 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage{mathtools}
+\usepackage[left=3cm,right=2cm,top=3cm,bottom=3cm]{geometry}
+
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage[T1, T2A]{fontenc}
+\usepackage[english,russian]{babel}
+
+%for eqrem
+\newcommand\eqremname{где}
+\newlength\MyAEqRemLen
+\newlength\MyBEqRemLen
+\setlength\MyAEqRemLen{\textwidth}%
+\addtolength\MyAEqRemLen{-10mm}%
+\settowidth\MyBEqRemLen{{\eqremname}}%
+\addtolength\MyAEqRemLen{-\MyBEqRemLen}%
+\newenvironment{eqrem}{%
+ \begin{tabular}{@{}p{\MyBEqRemLen}@{ }p{\MyAEqRemLen}}
+{\eqremname}&%
+}{%
+ \end{tabular}
+}
+
+\begin{document}
+
+%\input{title}	% Титульный лист
+\tableofcontents 	% Оглавление, которое генерируется автоматически
+\input{introduction} 
+\input{graphicsDescription}
+
+\end{document}
+ 
