@@ -2,3 +2,7 @@
 *.xml
 *.bcf
 *.pdf
+*.aux
+*.log
+*.synñtex
+*.toc
